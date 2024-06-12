@@ -24,3 +24,8 @@ func HashPassword(password, salt string) (string, error) {
 	}
 	return string(hash), nil
 }
+
+func ComparePassword(hashedPassword, password, salt string) error {
+	saltedPassword := password + salt
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(saltedPassword))
+}
