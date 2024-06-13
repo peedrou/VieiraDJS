@@ -1,33 +1,31 @@
 package users
 
 import (
+	"VieiraDJS/app/helpers/builders"
 	"VieiraDJS/app/helpers/cryptography"
-	"VieiraDJS/app/models"
 	"errors"
 
 	"github.com/gocql/gocql"
 )
 
-func RegisterUser(session *gocql.Session, username, password, email string) error {
-	salt, err := cryptography.GenerateSalt(16)
-	if err != nil {
-		return err
+func RegisterUser(session *gocql.Session, username string, password string, email string) error {
+
+	validated_user, errUserCreation := builders.NewUser(
+		username, password, email,
+	)
+
+	if errUserCreation != nil {
+		return errors.New(errUserCreation.Error())
 	}
 
-	hashedPassword, err := cryptography.HashPassword(password, salt)
-	if err != nil {
-		return err
-	}
-
-	user := models.User{
-		Username: username,
-		Password: hashedPassword,
-		Salt:     salt,
-		Email:    email,
-	}
-
-	if err := session.Query(`INSERT INTO users (username, password, salt, email) VALUES (?, ?, ?, ?)`,
-		user.Username, user.Password, user.Salt, user.Email).Exec(); err != nil {
+	// TODO: Create other validating steps (check if other user exists with the emauil, username, etc)
+	if err := session.Query(
+		`INSERT INTO users (username, password, salt, email) VALUES (?, ?, ?, ?)`,
+		validated_user.User.Password,
+		validated_user.User.Password,
+		validated_user.User.Salt,
+		validated_user.User.Email,
+	).Exec(); err != nil {
 		return err
 	}
 	return nil
