@@ -15,13 +15,13 @@ func NewJob(isRecurring bool, maxRetries int, startTime time.Time, interval stri
 		CreatedTime: time.Now(),
 	}
 
-	validated_job := &validators.ValidatedJob{
+	validatedJob := &validators.ValidatedJob{
 		Job: *job,
 	}
 
-	if err := validated_job.ValidateJob(); err != nil {
+	if err := validatedJob.ValidateJob(); err != nil {
 		return nil, err
 	}
 
-	return validated_job, nil
+	return validatedJob, nil
 }
