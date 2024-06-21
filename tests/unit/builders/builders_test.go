@@ -18,3 +18,19 @@ func TestJobBuilder(t *testing.T) {
 		t.Errorf("NewJob() returned an unexpected error: %v", err)
 	}
 }
+
+func TestUserBuilder(t *testing.T) {
+	validated_user, err := builders.NewUser(
+		"test_user",
+		"password",
+		"testemail@email.com",
+	)
+
+	if err != nil {
+		t.Errorf("NewUser() returned an unexpected error: %v", err)
+	}
+
+	if validated_user.User.Password == "password" {
+		t.Errorf("password is not hashed")
+	}
+}
