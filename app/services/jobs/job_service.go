@@ -1,27 +1,40 @@
 package jobs
 
-// import (
-// 	"VieiraDJS/app/helpers/builders"
-// 	"VieiraDJS/app/helpers/validators"
-// 	"time"
+import (
+	"VieiraDJS/app/helpers/builders"
+	"VieiraDJS/app/helpers/validators"
+	"fmt"
+	"time"
 
-// 	"github.com/gocql/gocql"
-// )
+	"github.com/gocql/gocql"
+)
 
-// func CreateJob(session *gocql.Session, isRecurring bool, maxRetries int, startTime time.Time, interval string) error {
-// 	job, _ := builders.NewJob(
-// 		isRecurring,
-// 		maxRetries,
-// 		startTime,
-// 		interval,
-// 	)
+func CreateJob(session *gocql.Session, isRecurring bool, maxRetries int, startTime time.Time, interval string) (string, error) {
+	job, err := builders.NewJob(
+		isRecurring,
+		maxRetries,
+		startTime,
+		interval,
+	)
 
-// 	if job != nil {
-// 		response := InsertJobInDB(*job)
-// 	}
+	if err != nil {
+		return "", fmt.Errorf("failed to create job: %v", err)
+	}
 
-// }
+	if job == nil {
+		return "", fmt.Errorf("job returned nil")
+	}
 
-// func InsertJobInDB(job validators.ValidatedJob) error {
+	response, err := InsertJobInDB(*job)
 
-// }
+	if err != nil {
+		return "", fmt.Errorf("there was an error inserting the Job in the database: %v", err)
+	}
+
+	return response, nil
+
+}
+
+func InsertJobInDB(job validators.ValidatedJob) (string, error) {
+	
+}
