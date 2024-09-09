@@ -1,4 +1,4 @@
-// package crud
+package crud
 
 // import (
 // 	"fmt"
@@ -41,7 +41,6 @@
 // 		tableName,
 // 		strings.Join(whereConditions, " AND "),
 // 	)
-
 
 // 	iter := session.Query(query, values...).Iter()
 // 	defer iter.Close()

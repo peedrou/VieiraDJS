@@ -1,27 +1,28 @@
-// package crud
+package crud
 
-// import (
-// 	"fmt"
-// 	"reflect"
-// 	"strings"
+import (
+	"fmt"
 
-// 	"github.com/gocql/gocql"
-// )
+	"github.com/gocql/gocql"
+)
 
-// func UpdateModelSingleKey(session *gocql.Session, tableName string, key string, value string) error {
+func UpdateModelSingleKey(session *gocql.Session, tableName string, keyToUpdate string, valueToUpdate string, keyToSearch string, valueToSearch string) error {
 
-// 	query := fmt.Sprintf(
-// 		"UPDATE %s",
-// 		tableName,
-// 		strings.Join(fieldNames, " AND "),
-// 	)
+	query := fmt.Sprintf(
+		"UPDATE %s SET %s = '%s' WHERE %s = '%s'",
+		tableName,
+		keyToUpdate,
+		valueToUpdate,
+		keyToSearch,
+		valueToSearch,
+	)
 
 
-// 	err := session.Query(query, values...).Exec()
+	err := session.Query(query).Exec()
 
-// 	if err != nil {
-// 		return fmt.Errorf("failed to remove model from %s: %v", tableName, err)
-// 	}
+	if err != nil {
+		return fmt.Errorf("failed to update model from %s: %v", tableName, err)
+	}
 
-// 	return nil
-// }
+	return nil
+}
