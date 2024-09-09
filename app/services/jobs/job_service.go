@@ -1,6 +1,7 @@
 package jobs
 
 import (
+	crud "VieiraDJS/app/db/CRUD"
 	"VieiraDJS/app/helpers/builders"
 	"VieiraDJS/app/helpers/validators"
 	"fmt"
@@ -9,7 +10,7 @@ import (
 	"github.com/gocql/gocql"
 )
 
-func CreateJob(session *gocql.Session, isRecurring bool, maxRetries int, startTime time.Time, interval string) (string, error) {
+func CreateJob(session *gocql.Session, isRecurring bool, maxRetries int, startTime time.Time, interval string) error {
 	job, err := builders.NewJob(
 		isRecurring,
 		maxRetries,
@@ -18,23 +19,29 @@ func CreateJob(session *gocql.Session, isRecurring bool, maxRetries int, startTi
 	)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to create job: %v", err)
+		return fmt.Errorf("failed to create job: %v", err)
 	}
 
 	if job == nil {
-		return "", fmt.Errorf("job returned nil")
+		return fmt.Errorf("job returned nil")
 	}
 
-	response, err := InsertJobInDB(*job)
+	err = InsertJobInDB(session, *job)
 
 	if err != nil {
-		return "", fmt.Errorf("there was an error inserting the Job in the database: %v", err)
+		return fmt.Errorf("there was an error inserting the Job in the database: %v", err)
 	}
 
-	return response, nil
+	return nil
 
 }
 
-func InsertJobInDB(job validators.ValidatedJob) (string, error) {
-	
+func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
+	err := crud.CreateModel(session, "jobs", job)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
