@@ -2,7 +2,6 @@ package jobs
 
 import (
 	"VieiraDJS/app/helpers/builders"
-	"VieiraDJS/app/helpers/validators"
 	"fmt"
 	"time"
 
@@ -25,16 +24,12 @@ func CreateJob(session *gocql.Session, isRecurring bool, maxRetries int, startTi
 		return "", fmt.Errorf("job returned nil")
 	}
 
-	response, err := InsertJobInDB(*job)
+	// response, err := InsertJobInDB(*job)
 
 	if err != nil {
 		return "", fmt.Errorf("there was an error inserting the Job in the database: %v", err)
 	}
 
-	return response, nil
+	return "", nil
 
-}
-
-func InsertJobInDB(job validators.ValidatedJob) (string, error) {
-	
 }
