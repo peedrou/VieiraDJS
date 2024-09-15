@@ -2,7 +2,8 @@ name: Dev Deploy Pipeline
 
 on:
   pull_request:
-    - develop
+    branches:
+      - develop
 
 jobs:
   test-and-lint:
