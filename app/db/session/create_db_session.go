@@ -10,6 +10,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type SessionCreator interface {
+    CreateSession() (*gocql.Session, error)
+}
+
+type RealSessionCreator struct{}
+
 func init() {
     if err := godotenv.Load(); err != nil {
         log.Print("No .env file found")

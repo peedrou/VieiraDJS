@@ -1,4 +1,4 @@
-package builders
+package builders_test
 
 import (
 	"VieiraDJS/app/helpers/builders"
