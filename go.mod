@@ -5,6 +5,7 @@ go 1.22.4
 require github.com/joho/godotenv v1.5.1
 
 require (
+	github.com/Agent-Plus/gocqlmock v0.0.0-20190823135736-63f5e6494891 // indirect
 	github.com/bytedance/sonic v1.12.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect

@@ -1,47 +1,31 @@
 package mocks
 
 import (
-	reflect "reflect"
+	"VieiraDJS/app/interfaces/gocql_interface"
 
-	gocql "github.com/gocql/gocql"
-	gomock "github.com/golang/mock/gomock"
+	"github.com/Agent-Plus/gocqlmock"
 )
 
-// MockSessionCreator is a mock of SessionCreator interface.
-type MockSessionCreator struct {
-	ctrl     *gomock.Controller
-	recorder *MockSessionCreatorMockRecorder
+type MockSession struct {
+	*gocqlmock.Session
 }
 
-// MockSessionCreatorMockRecorder is the mock recorder for MockSessionCreator.
-type MockSessionCreatorMockRecorder struct {
-	mock *MockSessionCreator
+type MockQuery struct {
+	*gocqlmock.Query
 }
 
-// NewMockSessionCreator creates a new mock instance.
-func NewMockSessionCreator(ctrl *gomock.Controller) *MockSessionCreator {
-	mock := &MockSessionCreator{ctrl: ctrl}
-	mock.recorder = &MockSessionCreatorMockRecorder{mock}
-	return mock
+type MockIter struct {
+	*gocqlmock.Iter
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockSessionCreator) EXPECT() *MockSessionCreatorMockRecorder {
-	return m.recorder
+func (s MockSession) Query(query string, args ...interface{}) gocql_interface.QueryInterface {
+	return &MockQuery{s.Session.Query(query, args...)}
 }
 
-// CreateSession mocks base method.
-func (m *MockSessionCreator) CreateSession() (*gocql.Session, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSession")
-	ret0, _ := ret[0].(*gocql.Session)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+func (q MockQuery) Iter() gocql_interface.IterInterface {
+	return &MockIter{q.Query.Iter()}
 }
 
-// CreateSession indicates an expected call of CreateSession.
-func (mr *MockSessionCreatorMockRecorder) CreateSession() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockSessionCreator)(nil).CreateSession))
+func (q MockQuery) Exec() error {
+	return q.Query.Exec()
 }
-
