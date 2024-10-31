@@ -2,22 +2,21 @@ package crud
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/gocql/gocql"
 )
 
-func CreateModel(session *gocql.Session, tableName string, model interface{}) error {
+func CreateModel(session *gocql.Session, tableName string, fieldNames []string, values []interface{}) error {
 
-	modelType := reflect.TypeOf(model)
-	modelValue := reflect.TypeOf(model)
+	// modelType := reflect.TypeOf(model)
+	// modelValue := reflect.TypeOf(model)
 
-	if modelType.Kind() != reflect.Struct {
-		return fmt.Errorf("model type is not a struct")
-	}
+	// if modelType.Kind() != reflect.Struct {
+	// 	return fmt.Errorf("model type is not a struct")
+	// }
 
-	fieldNames, placeholders, values := DynamicModelBuilder(modelType, modelValue)
+	placeholders, values := DynamicModelBuilder(values)
 
 	query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",
@@ -34,4 +33,3 @@ func CreateModel(session *gocql.Session, tableName string, model interface{}) er
 	return nil
 
 }
-

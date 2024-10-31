@@ -4,12 +4,15 @@ import (
 	"VieiraDJS/app/helpers/validators"
 	"VieiraDJS/app/models"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-func NewJob(isRecurring bool, maxRetries int, startTime time.Time, interval string) (*validators.ValidatedJob, error) {
+func NewJob(jobID uuid.UUID, isRecurring bool, maxRetries int, startTime time.Time, interval string) (*validators.ValidatedJob, error) {
 	job := &models.Job{
+		JobID:       jobID,
 		IsRecurring: isRecurring,
-		MaxRetries: maxRetries,
+		MaxRetries:  maxRetries,
 		StartTime:   startTime,
 		Interval:    interval,
 		CreatedTime: time.Now(),
