@@ -5,10 +5,10 @@ import (
 	"VieiraDJS/app/models"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/gocql/gocql"
 )
 
-func NewJob(jobID uuid.UUID, isRecurring bool, maxRetries int, startTime time.Time, interval string) (*validators.ValidatedJob, error) {
+func NewJob(jobID gocql.UUID, isRecurring bool, maxRetries int, startTime time.Time, interval string) (*validators.ValidatedJob, error) {
 	job := &models.Job{
 		JobID:       jobID,
 		IsRecurring: isRecurring,

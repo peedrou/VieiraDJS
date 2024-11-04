@@ -12,8 +12,10 @@ import (
 )
 
 func CreateJob(session *gocql.Session, isRecurring bool, maxRetries int, startTime time.Time, interval string) error {
+	someUUID := uuid.New()
+	gocqlUUID, err := gocql.ParseUUID(someUUID.String())
 	job, err := builders.NewJob(
-		uuid.New(),
+		gocqlUUID,
 		isRecurring,
 		maxRetries,
 		startTime,
@@ -40,12 +42,10 @@ func CreateJob(session *gocql.Session, isRecurring bool, maxRetries int, startTi
 
 func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
 	fields := []string{}
-	values := []interface{}{}
 
 	fields = append(fields, "job_id", "created_time", "interval", "is_recurring", "max_retries", "start_time")
-	values = append(values, job.Job.JobID, job.Job.CreatedTime, job.Job.Interval, job.Job.IsRecurring, job.Job.MaxRetries, job.Job.StartTime)
 
-	err := crud.CreateModel(session, "jobs", fields, values)
+	err := crud.CreateModel(session, "jobs", fields, job.Job.JobID, job.Job.CreatedTime, job.Job.Interval, job.Job.IsRecurring, job.Job.MaxRetries, job.Job.StartTime)
 
 	if err != nil {
 		return err

@@ -3,11 +3,11 @@ package models
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/gocql/gocql"
 )
 
 type Job struct {
-	JobID       uuid.UUID
+	JobID       gocql.UUID
 	IsRecurring bool
 	StartTime   time.Time
 	Interval    string

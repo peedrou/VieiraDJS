@@ -7,16 +7,14 @@ import (
 	"github.com/gocql/gocql"
 )
 
-func CreateModel(session *gocql.Session, tableName string, fieldNames []string, values []interface{}) error {
+func CreateModel(session *gocql.Session, tableName string, fieldNames []string, values ...interface{}) error {
+	var placeholders []string
+	len := len(values)
 
-	// modelType := reflect.TypeOf(model)
-	// modelValue := reflect.TypeOf(model)
-
-	// if modelType.Kind() != reflect.Struct {
-	// 	return fmt.Errorf("model type is not a struct")
-	// }
-
-	placeholders, values := DynamicModelBuilder(values)
+	for i := 0; i < len; i++ {
+		placeholders = append(placeholders, "?")
+	}
+	// _, _ := DynamicModelBuilder(values)
 
 	query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",
