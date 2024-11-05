@@ -14,7 +14,6 @@ func CreateModel(session *gocql.Session, tableName string, fieldNames []string, 
 	for i := 0; i < len; i++ {
 		placeholders = append(placeholders, "?")
 	}
-	// _, _ := DynamicModelBuilder(values)
 
 	query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",

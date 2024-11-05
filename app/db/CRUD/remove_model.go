@@ -2,30 +2,34 @@ package crud
 
 import (
 	"fmt"
-	// "reflect"
 	"strings"
 
 	"github.com/gocql/gocql"
 )
 
-func RemoveModel(session *gocql.Session, tableName string, model []interface{}) error {
+func RemoveModel(session *gocql.Session, tableName string, IDField string, IDs []interface{}) error {
+	if len(IDs) == 0 {
+		return fmt.Errorf("no IDs provided for deletion")
+	}
 
-	// modelType := reflect.TypeOf(model)
-	// modelValue := reflect.TypeOf(model)
+	placeholders := make([]string, len(IDs))
+	for i := range placeholders {
+		placeholders[i] = "?"
+	}
 
-	// if modelType.Kind() != reflect.Struct {
-	// 	return fmt.Errorf("model type is not a struct")
+	// values := make([]interface{}, len(IDs))
+	// for i, id := range IDs {
+	// 	values[i] = id
 	// }
 
-	fieldNames, values := DynamicModelBuilder(model)
-
 	query := fmt.Sprintf(
-		"DELETE FROM %s WHERE %s",
+		"DELETE FROM %s WHERE %s IN (%s)",
 		tableName,
-		strings.Join(fieldNames, " AND "),
+		IDField,
+		strings.Join(placeholders, ", "),
 	)
 
-	err := session.Query(query, values...).Exec()
+	err := session.Query(query, IDs...).Exec()
 
 	if err != nil {
 		return fmt.Errorf("failed to remove model from %s: %v", tableName, err)
