@@ -40,6 +40,48 @@ func CreateJob(session *gocql.Session, isRecurring bool, maxRetries int, startTi
 
 }
 
+func RemoveJobs(session *gocql.Session, IDs []interface{}) error {
+	if len(IDs) == 0 {
+		return fmt.Errorf("no IDs were provided for job removal")
+	}
+
+	err := crud.RemoveModel(session, "jobs", "job_id", IDs)
+
+	if err != nil {
+		return fmt.Errorf("there was an error removing the Job(s) from the database: %v", err)
+	}
+
+	return nil
+}
+
+func UpdateJobs(session *gocql.Session, keyToUpdate string, valueToUpdate string, IDs []interface{}) error {
+	if len(IDs) == 0 {
+		return fmt.Errorf("no IDs were provided for job update")
+	}
+
+	err := crud.UpdateModelBatch(session, "jobs", keyToUpdate, valueToUpdate, "job_id", IDs)
+
+	if err != nil {
+		return fmt.Errorf("there was an error updating the Job(s) from the database: %v", err)
+	}
+
+	return nil
+}
+
+func ReadJobs(session *gocql.Session, keys []string, values ...interface{}) ([]interface{}, error) {
+	if len(keys) == 0 {
+		return nil, fmt.Errorf("no keys were provided for job reading")
+	}
+
+	result, err := crud.ReadModel(session, "jobs", []string{"job_id"}, keys, values...)
+
+	if err != nil {
+		return nil, fmt.Errorf("there was an error reading the Job(s) from the database: %v", err)
+	}
+
+	return result, nil
+}
+
 func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
 	fields := []string{}
 
