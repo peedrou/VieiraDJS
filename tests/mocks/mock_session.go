@@ -1,4 +1,4 @@
-// package mocks
+package mocks
 
 // import (
 // 	"VieiraDJS/app/interfaces/gocql_interface"

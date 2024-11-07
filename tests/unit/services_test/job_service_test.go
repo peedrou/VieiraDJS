@@ -1,4 +1,4 @@
-// package services_test
+package services_test
 
 // import (
 // 	"testing"
@@ -16,13 +16,13 @@
 // 	// Create a mock session
 // 	mockSession := wrappers.NewMockSessionInterface(ctrl)
 
-// 	mockQuery := wrappers.NewMockQueryInterface(ctrl) 
+// 	mockQuery := wrappers.NewMockQueryInterface(ctrl)
 
 // 	mockSession.EXPECT().
 // 		Query(gomock.Any(), gomock.Any()).
-// 		Return(mockQuery) 
+// 		Return(mockQuery)
 
-// 	mockQuery.EXPECT().Exec().Return(nil) 
+// 	mockQuery.EXPECT().Exec().Return(nil)
 
 // 	isRecurring := true
 // 	maxRetries := 3

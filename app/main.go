@@ -46,7 +46,7 @@ func main() {
 
 	result, _ := crud.ReadModel(session, "jobs", []string{"job_id"}, []string{"interval"}, "2h")
 
-	fmt.Println("job successfully read from Cassandra! %v", result)
+	fmt.Printf("job successfully read from Cassandra! %v", result)
 
 	err = crud.UpdateModelBatch(session, "jobs", "interval", "6h", "job_id", result)
 	if err != nil {
