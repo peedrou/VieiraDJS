@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/gocql/gocql"
 )
 
 type TaskStatus string
@@ -16,7 +18,7 @@ const (
 )
 
 type TaskHistory struct {
-	JobId          int
+	JobId          gocql.UUID
 	ExecutionTime  time.Time
 	Status         TaskStatus
 	RetryCount     int

@@ -4,9 +4,11 @@ import (
 	"VieiraDJS/app/helpers/validators"
 	"VieiraDJS/app/models"
 	"time"
+
+	"github.com/gocql/gocql"
 )
 
-func NewTaskHistory(jobId int, executionTime time.Time, status models.TaskStatus, retryCount int, lastUpdateTime time.Time) (*validators.ValidatedTaskHistory, error) {
+func NewTaskHistory(jobId gocql.UUID, executionTime time.Time, status models.TaskStatus, retryCount int, lastUpdateTime time.Time) (*validators.ValidatedTaskHistory, error) {
 	taskHistory := &models.TaskHistory{
 		JobId:          jobId,
 		ExecutionTime:  executionTime,
