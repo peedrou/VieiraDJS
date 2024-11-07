@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Launch main.go",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${workspaceFolder}/app/main.go",
+        "envFile": "${workspaceFolder}/app/.env", // Load your .env file
+        "args": []
+      }
+    ]
+  }
+  

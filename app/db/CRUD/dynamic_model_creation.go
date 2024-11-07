@@ -1,24 +1,33 @@
 package crud
 
-import (
-	"reflect"
-	"strings"
-)
+// import (
+// 	"fmt"
+// 	"reflect"
+// )
 
-func DynamicModelBuilder(modelType reflect.Type, modelValue reflect.Type) ([]string, []string, []interface{}) {
-	var fieldNames []string
-	var placeholders []string
-	var values []interface{}
+// func DynamicModelBuilder(model ...interface{}) ([]string, []interface{}) {
+// 	var placeholders []string
+// 	var values []interface{}
 
-	for i := 0; i < modelType.NumField(); i++ {
-		field := modelType.Field(i)
-		value := modelValue.Field(i)
+// 	for range model {
+// 		placeholders = append(placeholders, "?")
+// 	}
+// 	for _, m := range model {
+// 		// Get the value of the current model
+// 		modelValue := reflect.ValueOf(m)
+// 		num := modelValue.NumField()
+// 		fmt.Errorf("%s", num)
 
-		fieldName := strings.ToLower(field.Name)
+// 	}
 
-		fieldNames = append(fieldNames, fieldName)
-		placeholders = append(placeholders, "?")
-		values = append(values, value)
-	}
-	return fieldNames, placeholders, values
-}
+// 	// modelValue := reflect.ValueOf(model)
+// 	// modelType := modelValue.Type()
+
+// 	// for i := 0; i < modelType.NumField(); i++ {
+// 	// 	value := modelValue.Field(i)
+
+// 	// 	placeholders = append(placeholders, "?")
+// 	// 	values = append(values, value)
+// 	// }
+// 	return placeholders, values
+// }

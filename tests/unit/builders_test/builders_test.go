@@ -1,13 +1,19 @@
-package builders
+package builders_test
 
 import (
 	"VieiraDJS/app/helpers/builders"
 	"testing"
 	"time"
+
+	"github.com/gocql/gocql"
+	"github.com/google/uuid"
 )
 
 func TestJobBuilder(t *testing.T) {
+	someUUID := uuid.New()
+	gocqlUUID, _ := gocql.ParseUUID(someUUID.String())
 	_, err := builders.NewJob(
+		gocqlUUID,
 		true,
 		2,
 		time.Now(),
