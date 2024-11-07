@@ -3,7 +3,6 @@ package jobs
 import (
 	crud "VieiraDJS/app/db/CRUD"
 	"VieiraDJS/app/helpers/builders"
-	"VieiraDJS/app/helpers/validators"
 	"fmt"
 	"time"
 
