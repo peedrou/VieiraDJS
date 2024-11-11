@@ -39,7 +39,7 @@ func (th ValidatedTaskHistory) ValidateTaskHistory() error {
 
 func isValidTaskStatus(status models.TaskStatus) bool {
 	switch status {
-	case models.TaskStatusCompleted, models.TaskStatusError, models.TaskStatusFailed, models.TaskStatusPending, models.TaskStatusRunning, models.TaskStatusUndefined:
+	case models.TaskStatusCompleted, models.TaskStatusScheduled, models.TaskStatusFailed, models.TaskStatusPending, models.TaskStatusRunning, models.TaskStatusUndefined:
 		return true
 	}
 	return false

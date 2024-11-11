@@ -10,7 +10,7 @@ type TaskStatus string
 
 const (
 	TaskStatusUndefined TaskStatus = "UNDEFINED"
-	TaskStatusError     TaskStatus = "ERROR"
+	TaskStatusScheduled TaskStatus = "SCHEDULED"
 	TaskStatusPending   TaskStatus = "PENDING"
 	TaskStatusRunning   TaskStatus = "RUNNING"
 	TaskStatusFailed    TaskStatus = "FAILED"
