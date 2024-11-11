@@ -18,7 +18,7 @@ func (ts ValidatedTaskSchedule) ValidateTaskSchedule() error {
 		return errors.New("partition is not a valid UNIX timestamp")
 	}
 
-	if reflect.TypeOf(ts.TaskSchedule.JobId) == reflect.TypeOf(gocql.UUID{}) {
+	if reflect.TypeOf(ts.TaskSchedule.JobId) != reflect.TypeOf(gocql.UUID{}) {
 		return errors.New("JobID is not of type gocql.UUID")
 	}
 

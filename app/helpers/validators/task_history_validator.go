@@ -14,7 +14,7 @@ type ValidatedTaskHistory struct {
 
 func (th ValidatedTaskHistory) ValidateTaskHistory() error {
 
-	if reflect.TypeOf(th.TaskHistory.JobId) == reflect.TypeOf(gocql.UUID{}) {
+	if reflect.TypeOf(th.TaskHistory.JobId) != reflect.TypeOf(gocql.UUID{}) {
 		return errors.New("JobID is not of type gocql.UUID")
 	}
 

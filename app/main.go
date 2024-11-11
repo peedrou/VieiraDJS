@@ -36,7 +36,7 @@ func main() {
 	}
 	defer session.Close()
 
-	err = jobs.CreateJob(session, true, 3, time.Now(), "2h")
+	err = jobs.CreateJob(session, true, 3, time.Now(), "8h")
 	if err != nil {
 		fmt.Printf("Error creating job: %v\n", err)
 		return
