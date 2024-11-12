@@ -117,7 +117,7 @@ func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
 		taskSchedule.TaskSchedule.JobId)
 
 	if err != nil {
-		crud.RemoveModel(session, "jobs", "job_id", []interface{}{id})
+		_ = crud.RemoveModel(session, "jobs", "job_id", []interface{}{id})
 		return err
 	}
 
@@ -139,8 +139,8 @@ func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
 		taskHistory.TaskHistory.LastUpdateTime)
 
 	if err != nil {
-		crud.RemoveModel(session, "jobs", "job_id", []interface{}{id})
-		crud.RemoveModel(session, "task_schedule", "job_id", []interface{}{id})
+		_ = crud.RemoveModel(session, "jobs", "job_id", []interface{}{id})
+		_ = crud.RemoveModel(session, "task_schedule", "job_id", []interface{}{id})
 		return err
 	}
 
