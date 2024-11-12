@@ -1,6 +1,10 @@
 package models
 
+import (
+	"github.com/gocql/gocql"
+)
+
 type TaskSchedule struct {
-	Partition int64
-	JobId     int
+	NextExecutionTime int64
+	JobId             gocql.UUID
 }

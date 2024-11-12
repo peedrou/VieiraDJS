@@ -2,13 +2,15 @@ package models
 
 import (
 	"time"
+
+	"github.com/gocql/gocql"
 )
 
 type TaskStatus string
 
 const (
 	TaskStatusUndefined TaskStatus = "UNDEFINED"
-	TaskStatusError     TaskStatus = "ERROR"
+	TaskStatusScheduled TaskStatus = "SCHEDULED"
 	TaskStatusPending   TaskStatus = "PENDING"
 	TaskStatusRunning   TaskStatus = "RUNNING"
 	TaskStatusFailed    TaskStatus = "FAILED"
@@ -16,7 +18,7 @@ const (
 )
 
 type TaskHistory struct {
-	JobId          int
+	JobId          gocql.UUID
 	ExecutionTime  time.Time
 	Status         TaskStatus
 	RetryCount     int

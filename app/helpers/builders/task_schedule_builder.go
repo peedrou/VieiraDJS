@@ -3,12 +3,14 @@ package builders
 import (
 	"VieiraDJS/app/helpers/validators"
 	"VieiraDJS/app/models"
+
+	"github.com/gocql/gocql"
 )
 
-func NewTaskSchedule(partition int64, jobId int) (*validators.ValidatedTaskSchedule, error) {
+func NewTaskSchedule(nextExecutionTime int64, jobId gocql.UUID) (*validators.ValidatedTaskSchedule, error) {
 	taskSchedule := &models.TaskSchedule{
-		Partition: partition,
-		JobId: jobId,
+		NextExecutionTime: nextExecutionTime,
+		JobId:             jobId,
 	}
 
 	validatedTaskSchedule := &validators.ValidatedTaskSchedule{

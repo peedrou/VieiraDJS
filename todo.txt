@@ -1,0 +1,9 @@
+- change interval nomenclature to account for minutes, hours, days, weeks
+- Create scheduling service (account for race conditions) (how to deploy several instances and orchestration)
+- Apache Kafka integration
+- Delve into possible different queries 
+- Make a list of possible errors
+- Add user table and user logic
+- React for frontend?
+- API design
+- Automatic local cassandra database deployment

@@ -3,7 +3,9 @@ package jobs
 import (
 	crud "VieiraDJS/app/db/CRUD"
 	"VieiraDJS/app/helpers/builders"
+	"VieiraDJS/app/helpers/converters"
 	"VieiraDJS/app/helpers/validators"
+	"VieiraDJS/app/models"
 	"fmt"
 	"time"
 
@@ -54,7 +56,7 @@ func RemoveJobs(session *gocql.Session, IDs []interface{}) error {
 	return nil
 }
 
-func UpdateJobs(session *gocql.Session, keyToUpdate string, valueToUpdate string, IDs []interface{}) error {
+func UpdateJobs(session *gocql.Session, keyToUpdate string, valueToUpdate interface{}, IDs []interface{}) error {
 	if len(IDs) == 0 {
 		return fmt.Errorf("no IDs were provided for job update")
 	}
@@ -83,6 +85,7 @@ func ReadJobs(session *gocql.Session, keys []string, values ...interface{}) ([]i
 }
 
 func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
+	id := job.Job.JobID
 	fields := []string{}
 
 	fields = append(fields, "job_id", "created_time", "interval", "is_recurring", "max_retries", "start_time")
@@ -91,7 +94,7 @@ func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
 		session,
 		"jobs",
 		fields,
-		job.Job.JobID,
+		id,
 		job.Job.CreatedTime,
 		job.Job.Interval,
 		job.Job.IsRecurring,
@@ -99,6 +102,45 @@ func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
 		job.Job.StartTime)
 
 	if err != nil {
+		return err
+	}
+
+	taskSchedule, _ := builders.NewTaskSchedule(
+		converters.ConvertExecutionTimeToUNIX(job.Job.StartTime),
+		id)
+
+	err = crud.CreateModel(
+		session,
+		"task_schedule",
+		[]string{"next_execution_time", "job_id"},
+		taskSchedule.TaskSchedule.NextExecutionTime,
+		taskSchedule.TaskSchedule.JobId)
+
+	if err != nil {
+		_ = crud.RemoveModel(session, "jobs", "job_id", []interface{}{id})
+		return err
+	}
+
+	taskHistory, _ := builders.NewTaskHistory(
+		id,
+		job.Job.CreatedTime,
+		models.TaskStatusPending,
+		job.Job.MaxRetries,
+		job.Job.CreatedTime)
+
+	err = crud.CreateModel(
+		session,
+		"task_history",
+		[]string{"job_id", "execution_time", "status", "retry_count", "last_update_time"},
+		id,
+		taskHistory.TaskHistory.ExecutionTime,
+		taskHistory.TaskHistory.Status,
+		taskHistory.TaskHistory.RetryCount,
+		taskHistory.TaskHistory.LastUpdateTime)
+
+	if err != nil {
+		_ = crud.RemoveModel(session, "jobs", "job_id", []interface{}{id})
+		_ = crud.RemoveModel(session, "task_schedule", "job_id", []interface{}{id})
 		return err
 	}
 

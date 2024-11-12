@@ -26,7 +26,7 @@ func UpdateModelSingleKey(session *gocql.Session, tableName string, keyToUpdate 
 	return nil
 }
 
-func UpdateModelBatch(session *gocql.Session, tableName string, keyToUpdate string, valueToUpdate string, keyToSearch string, IDs []interface{}) error {
+func UpdateModelBatch(session *gocql.Session, tableName string, keyToUpdate string, valueToUpdate interface{}, keyToSearch string, IDs []interface{}) error {
 	if len(IDs) == 0 {
 		return fmt.Errorf("no IDs provided for updating")
 	}

@@ -3,7 +3,10 @@ package validators
 import (
 	"VieiraDJS/app/models"
 	"errors"
+	"reflect"
 	"time"
+
+	"github.com/gocql/gocql"
 )
 
 type ValidatedTaskSchedule struct {
@@ -11,12 +14,12 @@ type ValidatedTaskSchedule struct {
 }
 
 func (ts ValidatedTaskSchedule) ValidateTaskSchedule() error {
-	if !isValidUNIXTimestamp(ts.TaskSchedule.Partition) {
+	if !isValidUNIXTimestamp(ts.TaskSchedule.NextExecutionTime) {
 		return errors.New("partition is not a valid UNIX timestamp")
 	}
 
-	if ts.TaskSchedule.JobId < 0 {
-		return errors.New("the Job ID cannot be below 0")
+	if reflect.TypeOf(ts.TaskSchedule.JobId) != reflect.TypeOf(gocql.UUID{}) {
+		return errors.New("JobID is not of type gocql.UUID")
 	}
 
 	return nil
