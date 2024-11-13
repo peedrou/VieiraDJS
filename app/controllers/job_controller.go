@@ -10,10 +10,11 @@ import (
 )
 
 type JobRequest struct {
-	IsRecurring bool      `json:"is_recurring"`
-	MaxRetries  int       `json:"max_retries"`
-	StartTime   time.Time `json:"start_time"`
-	Interval    string    `json:"interval"`
+	UserID      gocql.UUID `json:"user_id"`
+	IsRecurring bool       `json:"is_recurring"`
+	MaxRetries  int        `json:"max_retries"`
+	StartTime   time.Time  `json:"start_time"`
+	Interval    string     `json:"interval"`
 }
 
 func CreateJobHandler(c *gin.Context) {
@@ -26,7 +27,7 @@ func CreateJobHandler(c *gin.Context) {
 
 	session := c.MustGet("session").(*gocql.Session)
 
-	err := jobs.CreateJob(session, jobReq.IsRecurring, jobReq.MaxRetries, jobReq.StartTime, jobReq.Interval)
+	err := jobs.CreateJob(session, jobReq.UserID, jobReq.IsRecurring, jobReq.MaxRetries, jobReq.StartTime, jobReq.Interval)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

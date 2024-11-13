@@ -8,8 +8,9 @@ import (
 	"github.com/gocql/gocql"
 )
 
-func NewJob(jobID gocql.UUID, isRecurring bool, maxRetries int, startTime time.Time, interval string) (*validators.ValidatedJob, error) {
+func NewJob(userID gocql.UUID, jobID gocql.UUID, isRecurring bool, maxRetries int, startTime time.Time, interval string) (*validators.ValidatedJob, error) {
 	job := &models.Job{
+		UserID:      userID,
 		JobID:       jobID,
 		IsRecurring: isRecurring,
 		MaxRetries:  maxRetries,

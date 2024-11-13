@@ -4,17 +4,20 @@ import (
 	"VieiraDJS/app/helpers/cryptography"
 	"VieiraDJS/app/helpers/validators"
 	"VieiraDJS/app/models"
+
+	"github.com/gocql/gocql"
 )
 
-func NewUser(username string, password string, email string) (*validators.ValidatedUser, error) {
+func NewUser(userID gocql.UUID, username string, password string, email string) (*validators.ValidatedUser, error) {
 	salt, _ := cryptography.GenerateSalt(16)
 	hashedPassword, _ := cryptography.HashPassword(password, salt)
 
 	user := &models.User{
+		UserID:   userID,
 		Username: username,
 		Password: hashedPassword,
-		Salt: salt,
-		Email: email,
+		Salt:     salt,
+		Email:    email,
 	}
 
 	validated_user := &validators.ValidatedUser{

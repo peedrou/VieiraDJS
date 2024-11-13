@@ -3,6 +3,7 @@ package main
 import (
 	crud "VieiraDJS/app/db/CRUD"
 	"VieiraDJS/app/services/jobs"
+	"VieiraDJS/app/services/users"
 	"fmt"
 	"log"
 	"os"
@@ -36,7 +37,13 @@ func main() {
 	}
 	defer session.Close()
 
-	err = jobs.CreateJob(session, true, 3, time.Now(), "8h")
+	user_id, err := users.RegisterUser(session, "testuser6", "hellopassword", "thisisanemail6@gmail.com")
+	if err != nil {
+		fmt.Printf("Error creating user: %v\n", err)
+		return
+	}
+
+	err = jobs.CreateJob(session, user_id, true, 3, time.Now(), "8H")
 	if err != nil {
 		fmt.Printf("Error creating job: %v\n", err)
 		return
@@ -48,7 +55,7 @@ func main() {
 
 	fmt.Printf("job successfully read from Cassandra! %v", result)
 
-	err = crud.UpdateModelBatch(session, "jobs", "interval", "6h", "job_id", result)
+	err = crud.UpdateModelBatch(session, "jobs", "interval", "6H", "job_id", result)
 	if err != nil {
 		fmt.Printf("Error Deleting model: %v\n", err)
 		return
