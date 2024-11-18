@@ -20,7 +20,7 @@ func TestJobBuilder(t *testing.T) {
 		true,
 		2,
 		time.Now(),
-		"PT3H",
+		"3H",
 	)
 
 	if err != nil {
