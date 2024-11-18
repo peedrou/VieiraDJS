@@ -1,34 +1,48 @@
 package users
 
 import (
+	crud "VieiraDJS/app/db/CRUD"
 	"VieiraDJS/app/helpers/builders"
 	"VieiraDJS/app/helpers/cryptography"
 	"errors"
+	"fmt"
 
 	"github.com/gocql/gocql"
+	"github.com/google/uuid"
 )
 
-func RegisterUser(session *gocql.Session, username string, password string, email string) error {
+func RegisterUser(session *gocql.Session, username string, password string, email string) (gocql.UUID, error) {
+	someUUID := uuid.New()
+	gocqlUUID, _ := gocql.ParseUUID(someUUID.String())
 
 	validated_user, errUserCreation := builders.NewUser(
-		username, password, email,
+		gocqlUUID, username, password, email,
 	)
 
 	if errUserCreation != nil {
-		return errors.New(errUserCreation.Error())
+		return gocqlUUID, errors.New(errUserCreation.Error())
 	}
 
 	// TODO: Create other validating steps (check if other user exists with the emauil, username, etc)
-	if err := session.Query(
-		`INSERT INTO users (username, password, salt, email) VALUES (?, ?, ?, ?)`,
-		validated_user.User.Password,
+	fields := []string{}
+
+	fields = append(fields, "user_id", "username", "password", "salt", "email")
+
+	err := crud.CreateModel(
+		session,
+		"users",
+		fields,
+		gocqlUUID,
+		validated_user.User.Username,
 		validated_user.User.Password,
 		validated_user.User.Salt,
-		validated_user.User.Email,
-	).Exec(); err != nil {
-		return err
+		validated_user.User.Email)
+
+	if err != nil {
+		return gocqlUUID, fmt.Errorf("there was an error inserting the user in the database: %v", err)
 	}
-	return nil
+
+	return gocqlUUID, nil
 }
 
 func AuthenticateUser(session *gocql.Session, username string, password string) (bool, error) {
@@ -45,4 +59,46 @@ func AuthenticateUser(session *gocql.Session, username string, password string) 
 	}
 
 	return true, nil
+}
+
+func ReadUsersGetUserID(session *gocql.Session, keys []string, values ...interface{}) ([]interface{}, error) {
+	if len(keys) == 0 {
+		return nil, fmt.Errorf("no keys were provided for user reading")
+	}
+
+	result, err := crud.ReadModel(session, "users", []string{"user_id"}, keys, values...)
+
+	if err != nil {
+		return nil, fmt.Errorf("there was an error reading the user(s) from the database: %v", err)
+	}
+
+	return result, nil
+}
+
+func ReadUsersGetEmail(session *gocql.Session, keys []string, values ...interface{}) ([]interface{}, error) {
+	if len(keys) == 0 {
+		return nil, fmt.Errorf("no keys were provided for user reading")
+	}
+
+	result, err := crud.ReadModel(session, "users", []string{"email"}, keys, values...)
+
+	if err != nil {
+		return nil, fmt.Errorf("there was an error reading the user(s) from the database: %v", err)
+	}
+
+	return result, nil
+}
+
+func ReadUsersGetUsername(session *gocql.Session, keys []string, values ...interface{}) ([]interface{}, error) {
+	if len(keys) == 0 {
+		return nil, fmt.Errorf("no keys were provided for user reading")
+	}
+
+	result, err := crud.ReadModel(session, "users", []string{"username"}, keys, values...)
+
+	if err != nil {
+		return nil, fmt.Errorf("there was an error reading the user(s) from the database: %v", err)
+	}
+
+	return result, nil
 }

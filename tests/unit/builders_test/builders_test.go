@@ -11,13 +11,16 @@ import (
 
 func TestJobBuilder(t *testing.T) {
 	someUUID := uuid.New()
+	someUUID2 := uuid.New()
 	gocqlUUID, _ := gocql.ParseUUID(someUUID.String())
+	gocqlUUID2, _ := gocql.ParseUUID(someUUID2.String())
 	_, err := builders.NewJob(
 		gocqlUUID,
+		gocqlUUID2,
 		true,
 		2,
 		time.Now(),
-		"PT3H",
+		"3H",
 	)
 
 	if err != nil {
@@ -26,7 +29,11 @@ func TestJobBuilder(t *testing.T) {
 }
 
 func TestUserBuilder(t *testing.T) {
+	someUUID := uuid.New()
+	gocqlUUID, _ := gocql.ParseUUID(someUUID.String())
+
 	validated_user, err := builders.NewUser(
+		gocqlUUID,
 		"test_user",
 		"password",
 		"testemail@email.com",

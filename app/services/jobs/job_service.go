@@ -13,10 +13,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func CreateJob(session *gocql.Session, isRecurring bool, maxRetries int, startTime time.Time, interval string) error {
+func CreateJob(session *gocql.Session, userID gocql.UUID, isRecurring bool, maxRetries int, startTime time.Time, interval string) error {
 	someUUID := uuid.New()
 	gocqlUUID, _ := gocql.ParseUUID(someUUID.String())
 	job, err := builders.NewJob(
+		userID,
 		gocqlUUID,
 		isRecurring,
 		maxRetries,
@@ -88,12 +89,13 @@ func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
 	id := job.Job.JobID
 	fields := []string{}
 
-	fields = append(fields, "job_id", "created_time", "interval", "is_recurring", "max_retries", "start_time")
+	fields = append(fields, "user_id", "job_id", "created_time", "interval", "is_recurring", "max_retries", "start_time")
 
 	err := crud.CreateModel(
 		session,
 		"jobs",
 		fields,
+		job.Job.UserID,
 		id,
 		job.Job.CreatedTime,
 		job.Job.Interval,
