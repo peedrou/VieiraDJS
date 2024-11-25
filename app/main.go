@@ -36,7 +36,7 @@ func main() {
 
 	producer, err := kafka.NewKafkaProducer([]string{kafkaBrokers})
 
-	producer.SendMessage("my_new_topic", "Hello Im a message!")
+	producer.SendMessage("test_topic", "Hello Im a message!")
 
 	producer.Close()
 
