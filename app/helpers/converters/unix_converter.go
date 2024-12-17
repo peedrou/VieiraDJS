@@ -6,5 +6,6 @@ import (
 
 func ConvertExecutionTimeToUNIX(execution_time time.Time) int64 {
 	converted_time := execution_time.Unix()
-	return converted_time
+	converted_timeWithoutSeconds := converted_time / 60
+	return converted_timeWithoutSeconds
 }

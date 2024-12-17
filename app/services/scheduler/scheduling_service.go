@@ -34,12 +34,13 @@ func SchedulePendingTasks(kp *kafka.KafkaProducer, tasks []interface{}) ([]inter
 	var tasksFailed []interface{}
 
 	for _, task := range tasks {
-		taskMessage, ok := task.(string)
+		taskUUID, ok := task.(gocql.UUID) // failing here
 		if !ok {
 			return tasksSucceeded, tasksFailed, fmt.Errorf("invalid task format: %v", task)
 		}
 
 		topic := "task-schedule"
+		taskMessage := taskUUID.String()
 
 		err := kp.SendMessage(topic, taskMessage)
 		if err != nil {
