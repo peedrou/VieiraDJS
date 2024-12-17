@@ -4,11 +4,15 @@ import (
 	// crud "VieiraDJS/app/db/CRUD"
 	// "VieiraDJS/app/services/jobs"
 	// "VieiraDJS/app/services/users"
-	// "fmt"
 	"VieiraDJS/app/kafka"
+	"VieiraDJS/app/services/jobs"
+	"VieiraDJS/app/services/scheduler"
+	"VieiraDJS/app/services/users"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	// "time"
 
@@ -34,31 +38,46 @@ func main() {
 	cluster.Keyspace = cassandraKeyspace
 	cluster.Consistency = gocql.Quorum
 
+	session, err := cluster.CreateSession()
+	if err != nil {
+		log.Fatalf("Failed to connect to Cassandra: %v", err)
+	}
+	defer session.Close()
+
+	user_id, err := users.RegisterUser(session, "testuser6", "hellopassword", "thisisanemail6@gmail.com")
+	if err != nil {
+		fmt.Printf("Error creating user: %v\n", err)
+		return
+	}
+
+	err = jobs.CreateJob(session, user_id, true, 3, time.Now(), "8H")
+	if err != nil {
+		fmt.Printf("Error creating job: %v\n", err)
+		return
+	}
+
+	fmt.Println("Job successfully created and inserted into Cassandra!")
+
 	producer, err := kafka.NewKafkaProducer([]string{kafkaBrokers})
 
-	producer.SendMessage("test_topic", "Hello Im a message!")
+	if err != nil {
+		fmt.Printf("Error creating producer: %v\n", err)
+		return
+	}
+
+	tasks, err := scheduler.CheckPendingTasks(session)
+
+	if err != nil {
+		fmt.Printf("Error checking pending tasks: %v\n", err)
+		return
+	}
+
+	if tasks != nil {
+		tasksSucceeded, tasksFailed, err := scheduler.SchedulePendingTasks(producer, tasks)
+		fmt.Printf("%s , %s , %s", tasksSucceeded, tasksFailed, err)
+	}
 
 	producer.Close()
-
-	// session, err := cluster.CreateSession()
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to Cassandra: %v", err)
-	// }
-	// defer session.Close()
-
-	// user_id, err := users.RegisterUser(session, "testuser6", "hellopassword", "thisisanemail6@gmail.com")
-	// if err != nil {
-	// 	fmt.Printf("Error creating user: %v\n", err)
-	// 	return
-	// }
-
-	// err = jobs.CreateJob(session, user_id, true, 3, time.Now(), "8H")
-	// if err != nil {
-	// 	fmt.Printf("Error creating job: %v\n", err)
-	// 	return
-	// }
-
-	// fmt.Println("Job successfully created and inserted into Cassandra!")
 
 	// result, _ := crud.ReadModel(session, "jobs", []string{"job_id"}, []string{"interval"}, "2h")
 
