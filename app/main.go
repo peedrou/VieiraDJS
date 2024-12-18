@@ -79,21 +79,6 @@ func main() {
 
 	producer.Close()
 
-	// result, _ := crud.ReadModel(session, "jobs", []string{"job_id"}, []string{"interval"}, "2h")
-
-	// fmt.Printf("job successfully read from Cassandra! %v", result)
-
-	// err = crud.UpdateModelBatch(session, "jobs", "interval", "6H", "job_id", result)
-	// if err != nil {
-	// 	fmt.Printf("Error Deleting model: %v\n", err)
-	// 	return
-	// }
-
-	// err = crud.RemoveModel(session, "jobs", "job_id", result)
-	// if err != nil {
-	// 	fmt.Printf("Error Deleting model: %v\n", err)
-	// 	return
-	// }
 }
 
 func parsePort(port string) int {

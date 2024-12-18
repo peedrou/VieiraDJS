@@ -2,8 +2,11 @@ package scheduler
 
 import (
 	crud "VieiraDJS/app/db/CRUD"
+	"VieiraDJS/app/helpers/builders"
 	"VieiraDJS/app/helpers/converters"
 	"VieiraDJS/app/kafka"
+	"VieiraDJS/app/models"
+	"VieiraDJS/app/services/jobs"
 	"fmt"
 	"log"
 	"time"
@@ -29,23 +32,47 @@ func CheckPendingTasks(session *gocql.Session) ([]interface{}, error) {
 	return result, nil
 }
 
-func SchedulePendingTasks(kp *kafka.KafkaProducer, tasks []interface{}) ([]interface{}, []interface{}, error) {
+func SchedulePendingTasks(kp *kafka.KafkaProducer, tasks []interface{}, session *gocql.Session) ([]interface{}, []interface{}, error) {
 	var tasksSucceeded []interface{}
 	var tasksFailed []interface{}
+	var retryCount int
 
 	for _, task := range tasks {
-		taskUUID, ok := task.(gocql.UUID) // failing here
+		taskUUID, ok := task.(gocql.UUID)
 		if !ok {
 			return tasksSucceeded, tasksFailed, fmt.Errorf("invalid task format: %v", task)
 		}
 
+		result, err := crud.ReadModel(
+			session,
+			"task_history",
+			[]string{"retry_count"},
+			[]string{"job_id"},
+			taskUUID)
+
+		if err != nil {
+			return tasksSucceeded, tasksFailed, fmt.Errorf("failed to retrieve retry count: %v", task)
+		}
+
+		for _, r := range result {
+			retryCount = r.(int)
+		}
+
+		validatedTaskHistory, err := builders.NewTaskHistory(
+			taskUUID,
+			time.Now(),
+			models.TaskStatusPending,
+			retryCount,
+			time.Now())
+
 		topic := "task-schedule"
 		taskMessage := taskUUID.String()
 
-		err := kp.SendMessage(topic, taskMessage)
+		err = kp.SendMessage(topic, taskMessage)
 		if err != nil {
 			log.Printf("failed to send task message: %v", err)
 			tasksFailed = append(tasksFailed, task)
+			err = jobs.UpdateTaskHistory(session, validatedTaskHistory, models.TaskStatusFailed, time.Now(), true)
 		} else {
 			log.Printf("Task sent: %s", taskMessage)
 			tasksSucceeded = append(tasksSucceeded, task)
