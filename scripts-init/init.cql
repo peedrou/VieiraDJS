@@ -14,8 +14,7 @@ CREATE TABLE IF NOT EXISTS task_history (
 
 CREATE TABLE IF NOT EXISTS task_schedule (
     next_execution_time bigint,
-    job_id uuid,
-    PRIMARY KEY (next_execution_time, job_id)
+    job_id uuid PRIMARY KEY
 );
 
 CREATE TABLE IF NOT EXISTS jobs (

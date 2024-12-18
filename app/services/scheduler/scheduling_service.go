@@ -36,6 +36,8 @@ func SchedulePendingTasks(kp *kafka.KafkaProducer, tasks []interface{}, session 
 	var tasksSucceeded []interface{}
 	var tasksFailed []interface{}
 	var retryCount int
+	var isRecurring bool
+	var interval string
 
 	for _, task := range tasks {
 		taskUUID, ok := task.(gocql.UUID)
@@ -43,12 +45,7 @@ func SchedulePendingTasks(kp *kafka.KafkaProducer, tasks []interface{}, session 
 			return tasksSucceeded, tasksFailed, fmt.Errorf("invalid task format: %v", task)
 		}
 
-		result, err := crud.ReadModel(
-			session,
-			"task_history",
-			[]string{"retry_count"},
-			[]string{"job_id"},
-			taskUUID)
+		result, err := jobs.RetrieveRetryCount(session, taskUUID)
 
 		if err != nil {
 			return tasksSucceeded, tasksFailed, fmt.Errorf("failed to retrieve retry count: %v", task)
@@ -65,19 +62,66 @@ func SchedulePendingTasks(kp *kafka.KafkaProducer, tasks []interface{}, session 
 			retryCount,
 			time.Now())
 
-		topic := "task-schedule"
-		taskMessage := taskUUID.String()
+		if err != nil {
+			return tasksSucceeded, tasksFailed, fmt.Errorf("failed to build task history: %v", err)
+		}
 
-		err = kp.SendMessage(topic, taskMessage)
+		taskMessage, err := SendMessageToKafkaTopic("task-schedule", taskUUID, kp)
+
 		if err != nil {
 			log.Printf("failed to send task message: %v", err)
 			tasksFailed = append(tasksFailed, task)
 			err = jobs.UpdateTaskHistory(session, validatedTaskHistory, models.TaskStatusFailed, time.Now(), true)
+			if err != nil {
+				return tasksSucceeded, tasksFailed, fmt.Errorf("failed to update task history: %v", err)
+			}
 		} else {
 			log.Printf("Task sent: %s", taskMessage)
 			tasksSucceeded = append(tasksSucceeded, task)
+			err = jobs.UpdateTaskHistory(session, validatedTaskHistory, models.TaskStatusScheduled, time.Now(), false)
+			if err != nil {
+				return tasksSucceeded, tasksFailed, fmt.Errorf("failed to update task history: %v", err)
+			}
+
+			result, err = jobs.RetrieveJobIsRecurring(session, taskUUID)
+			if err != nil {
+				return tasksSucceeded, tasksFailed, fmt.Errorf("failed to retrieve task is_recurring: %v", err)
+			}
+
+			for _, r := range result {
+				isRecurring = r.(bool)
+			}
+
+			if isRecurring {
+				result, err = jobs.RetrieveJobInterval(session, taskUUID)
+				if err != nil {
+					return tasksSucceeded, tasksFailed, fmt.Errorf("failed to retrieve task interval: %v", err)
+				}
+
+				for _, r := range result {
+					interval = r.(string)
+				}
+
+				nextExecutionTime := converters.CalculateNextExecutionTimeInUnix(interval)
+				newTaskSchedule, err := builders.NewTaskSchedule(time.Now().Unix(), taskUUID)
+				if err != nil {
+					return tasksSucceeded, tasksFailed, fmt.Errorf("failed to create new task schedule: %v", err)
+				}
+
+				err = jobs.UpdateTaskSchedule(session, newTaskSchedule, nextExecutionTime)
+				if err != nil {
+					return tasksSucceeded, tasksFailed, fmt.Errorf("failed to create new task schedule: %v", err)
+				}
+			}
+
 		}
 	}
 
 	return tasksSucceeded, tasksFailed, nil
+}
+
+func SendMessageToKafkaTopic(topic string, taskUUID gocql.UUID, kp *kafka.KafkaProducer) (string, error) {
+	taskMessage := taskUUID.String()
+	err := kp.SendMessage(topic, taskMessage)
+	return taskMessage, err
 }

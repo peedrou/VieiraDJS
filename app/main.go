@@ -73,7 +73,7 @@ func main() {
 	}
 
 	if tasks != nil {
-		tasksSucceeded, tasksFailed, err := scheduler.SchedulePendingTasks(producer, tasks)
+		tasksSucceeded, tasksFailed, err := scheduler.SchedulePendingTasks(producer, tasks, session)
 		fmt.Printf("%s , %s , %s", tasksSucceeded, tasksFailed, err)
 	}
 
