@@ -103,12 +103,12 @@ func SchedulePendingTasks(kp *kafka.KafkaProducer, tasks []interface{}, session 
 				}
 
 				nextExecutionTime := converters.CalculateNextExecutionTimeInUnix(interval)
-				newTaskSchedule, err := builders.NewTaskSchedule(time.Now().Unix(), taskUUID)
+				newTaskSchedule, err := builders.NewTaskSchedule(nextExecutionTime, taskUUID)
 				if err != nil {
 					return tasksSucceeded, tasksFailed, fmt.Errorf("failed to create new task schedule: %v", err)
 				}
 
-				err = jobs.UpdateTaskSchedule(session, newTaskSchedule, nextExecutionTime)
+				err = jobs.CreateTaskSchedule(session, newTaskSchedule)
 				if err != nil {
 					return tasksSucceeded, tasksFailed, fmt.Errorf("failed to create new task schedule: %v", err)
 				}

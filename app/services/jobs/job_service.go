@@ -133,12 +133,7 @@ func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
 		converters.ConvertExecutionTimeToUNIX(job.Job.StartTime),
 		id)
 
-	err = crud.CreateModel(
-		session,
-		"task_schedule",
-		[]string{"next_execution_time", "job_id"},
-		taskSchedule.TaskSchedule.NextExecutionTime,
-		taskSchedule.TaskSchedule.JobId)
+	err = CreateTaskSchedule(session, taskSchedule)
 
 	if err != nil {
 		_ = crud.RemoveModel(session, "jobs", "job_id", []interface{}{id})
