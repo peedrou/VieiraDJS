@@ -37,3 +37,18 @@ func RemoveTaskSchedule(session *gocql.Session, taskSchedule *validators.Validat
 
 	return nil
 }
+
+func CreateTaskSchedule(session *gocql.Session, taskSchedule *validators.ValidatedTaskSchedule) error {
+	err := crud.CreateModel(
+		session,
+		"task_schedule",
+		[]string{"next_execution_time", "job_id"},
+		taskSchedule.TaskSchedule.NextExecutionTime,
+		taskSchedule.TaskSchedule.JobId)
+
+	if err != nil {
+		return fmt.Errorf("there was a problem removing the task schedule: %v", err)
+	}
+
+	return nil
+}

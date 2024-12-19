@@ -1,14 +1,20 @@
 package main
 
 import (
-	crud "VieiraDJS/app/db/CRUD"
+	// crud "VieiraDJS/app/db/CRUD"
+	// "VieiraDJS/app/services/jobs"
+	// "VieiraDJS/app/services/users"
+	"VieiraDJS/app/kafka"
 	"VieiraDJS/app/services/jobs"
+	"VieiraDJS/app/services/scheduler"
 	"VieiraDJS/app/services/users"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	// "time"
 
 	"strings"
 
@@ -25,6 +31,7 @@ func main() {
 	cassandraHosts := os.Getenv("CASSANDRA_HOSTS")
 	cassandraPort := os.Getenv("CASSANDRA_PORT")
 	cassandraKeyspace := os.Getenv("CASSANDRA_KEYSPACE")
+	kafkaBrokers := os.Getenv("KAFKA_BROKERS")
 
 	cluster := gocql.NewCluster(strings.Split(cassandraHosts, ",")...)
 	cluster.Port = parsePort(cassandraPort)
@@ -51,21 +58,27 @@ func main() {
 
 	fmt.Println("Job successfully created and inserted into Cassandra!")
 
-	result, _ := crud.ReadModel(session, "jobs", []string{"job_id"}, []string{"interval"}, "2h")
+	producer, err := kafka.NewKafkaProducer([]string{kafkaBrokers})
 
-	fmt.Printf("job successfully read from Cassandra! %v", result)
-
-	err = crud.UpdateModelBatch(session, "jobs", "interval", "6H", "job_id", result)
 	if err != nil {
-		fmt.Printf("Error Deleting model: %v\n", err)
+		fmt.Printf("Error creating producer: %v\n", err)
 		return
 	}
 
-	err = crud.RemoveModel(session, "jobs", "job_id", result)
+	tasks, err := scheduler.CheckPendingTasks(session)
+
 	if err != nil {
-		fmt.Printf("Error Deleting model: %v\n", err)
+		fmt.Printf("Error checking pending tasks: %v\n", err)
 		return
 	}
+
+	if tasks != nil {
+		tasksSucceeded, tasksFailed, err := scheduler.SchedulePendingTasks(producer, tasks, session)
+		fmt.Printf("%s , %s , %s", tasksSucceeded, tasksFailed, err)
+	}
+
+	producer.Close()
+
 }
 
 func parsePort(port string) int {

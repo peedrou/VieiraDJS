@@ -33,3 +33,14 @@ func UpdateTaskHistory(session *gocql.Session, taskHistory *validators.Validated
 
 	return nil
 }
+
+func RetrieveRetryCount(session *gocql.Session, taskUUID gocql.UUID) ([]interface{}, error) {
+	result, err := crud.ReadModel(
+		session,
+		"task_history",
+		[]string{"retry_count"},
+		[]string{"job_id"},
+		taskUUID)
+
+	return result, err
+}

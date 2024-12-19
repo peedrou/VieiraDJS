@@ -85,6 +85,28 @@ func ReadJobs(session *gocql.Session, keys []string, values ...interface{}) ([]i
 	return result, nil
 }
 
+func RetrieveJobInterval(session *gocql.Session, taskUUID gocql.UUID) ([]interface{}, error) {
+	result, err := crud.ReadModel(
+		session,
+		"jobs",
+		[]string{"interval"},
+		[]string{"job_id"},
+		taskUUID)
+
+	return result, err
+}
+
+func RetrieveJobIsRecurring(session *gocql.Session, taskUUID gocql.UUID) ([]interface{}, error) {
+	result, err := crud.ReadModel(
+		session,
+		"jobs",
+		[]string{"is_recurring"},
+		[]string{"job_id"},
+		taskUUID)
+
+	return result, err
+}
+
 func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
 	id := job.Job.JobID
 	fields := []string{}
@@ -111,12 +133,7 @@ func InsertJobInDB(session *gocql.Session, job validators.ValidatedJob) error {
 		converters.ConvertExecutionTimeToUNIX(job.Job.StartTime),
 		id)
 
-	err = crud.CreateModel(
-		session,
-		"task_schedule",
-		[]string{"next_execution_time", "job_id"},
-		taskSchedule.TaskSchedule.NextExecutionTime,
-		taskSchedule.TaskSchedule.JobId)
+	err = CreateTaskSchedule(session, taskSchedule)
 
 	if err != nil {
 		_ = crud.RemoveModel(session, "jobs", "job_id", []interface{}{id})

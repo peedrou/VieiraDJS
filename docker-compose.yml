@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra-db
+    environment:
+      CASSANDRA_CLUSTER_NAME: "MyCluster"
+      CASSANDRA_NUM_TOKENS: 256
+      CASSANDRA_START_RPC: "true"
+    ports:
+      - "9042:9042"
+    volumes:
+      - ./scripts-init:/scripts-init
+    healthcheck:
+      test: ["CMD", "cqlsh", "-f", "/scripts-init/init.cql"]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+      timeout: 20s
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    depends_on:
+      cassandra:
+        condition: service_healthy
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    depends_on:
+      - zookeeper
+      - cassandra
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,DOCKER_INTERNAL://kafka:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,DOCKER_INTERNAL://0.0.0.0:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,DOCKER_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    volumes:
+      - ./scripts-init:/scripts-init
+    user: root
+    # command:
+    #   [
+    #     "sh",
+    #     "-c",
+    #     "chmod +x /scripts-init/kafka-init.sh && /scripts-init/kafka-init.sh && /etc/confluent/docker/run",
+    #   ]
